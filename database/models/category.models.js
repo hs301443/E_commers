@@ -14,23 +14,20 @@ const categorySchema = new Schema({
         minlength:[1,"too short category name"]
 
     },
+    logo:{ public_id: String, secure_url: String },
     slug:{
 
         type:String,
         lowercase:true,
         required:true
-    },
-    image:{
-        type:String,
-       // required:true,
-
     }
+    
 
 
 
 },{timestamps:true})
 categorySchema.post('init',(doc)=>{
-    doc.image=process.env.BASE_URL +"category/" + doc.image;
+    doc.logo=process.env.BASE_URL +"category/" + doc.logo;
 })
 
 

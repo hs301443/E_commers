@@ -5,18 +5,37 @@ import { catcherror } from "../../utils/middleware/catchError.js";
 import { AppError } from "../../utils/services/AppError.js";
 import deleteone from "../../utils/handlers/refacor.handler.js";
 import APifeatuer from "../../utils/APIfeatuer.js";
+import cloudinary from "../../utils/middleware/cloudinary.js";
 
 
 
+export const addproduct=catcherror(async(req,res,next)=>{
+  console.log(req.body);
+  req.body.slug = slugify(req.body.title);
+        
+ 
+  req.body.images=[];
+  const files = req.files;
+  Object.keys(files).forEach(async key=>{
+    console.log(files[key]);
+    files[key].forEach(async file=>{
+      const { public_id, secure_url } = await cloudinary.uploader.upload(file.path ,{ folder: "E-Commerce/product" })
+      if (file.fieldname=="imagecover"){
+        req.body.imagecover={ public_id, secure_url}
+      
+      }else if(file.fieldname=="images"){
+        req.body.images.push({ public_id, secure_url});
 
-export const addproduct=async(req,res,next)=>{
-        req.body.slug = slugify(req.body.title);
-        req.body.imagcover = req.files.imagcover[0].filename;
-        req.body.images = req.files.images.map(ele => ele.filename)
-      let results = new productmodel(req.body);
-      let added = await results.save();
-      res.status(201).json({ message: "added", added });
-}
+      }
+
+
+    })
+  })
+
+let results = new productmodel(req.body);
+let added = await results.save();
+res.status(201).json({ message: "added", added });
+})
 
 export const getallproduct=catcherror(async(req,res,next)=>{
    

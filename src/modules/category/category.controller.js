@@ -5,16 +5,20 @@ import { catcherror } from "../../utils/middleware/catchError.js";
 import { AppError } from "../../utils/services/AppError.js";
 import deleteone from "../../utils/handlers/refacor.handler.js";
 import APifeatuer from "../../utils/APIfeatuer.js";
-
-
+import cloudinary from "../../utils/middleware/cloudinary.js";
 
 
 export const addcategory=catcherror(async(req,res,next)=>{
-    req.body.slug=slugify(req.body.name);
-    req.body.image = req.file.filename;
-    let result =new categorymodel(req.body)
-    await result.save();
-    res.status(201).json({message:"done",result})
+    const { name } = req.body
+    req.body.slug = slugify(name, "-")
+    const existName = await categorymodel.findOne({ name })
+    if (existName) {
+        return next(new AppError("Name Already exist", 409))
+    }
+    const { public_id, secure_url } = await cloudinary.uploader.upload(req.file.path, { folder: "E-Commerce/category" })
+    req.body.logo = { public_id, secure_url }
+    const result = await categorymodel.create(req.body)
+    res.status(201).json({ message: "success", result })
 })
 
 export const getallcategory=catcherror(async(req,res,next)=>{

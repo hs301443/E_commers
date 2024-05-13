@@ -2,7 +2,6 @@ import expresss from 'express';
 import{addcart, getallcart, removecart, updatecart} from "./cart.controller.js";
 import { protectrout } from '../auth/auth.controller.js';
 
-
 const cartrouts =expresss.Router();
 
 

@@ -31,7 +31,7 @@ const productSchema = new Schema({
         default:0,
         minlength:0
     },
-    discription:{
+    description:{
         type:String,
         maxlength:[100," product name must be less than 100"],
         minlength:[1,"product name must be more than 10"],
@@ -54,13 +54,8 @@ const productSchema = new Schema({
         default:0,
         minlength:0
     },
-    imagcover:{
-        type:String,
-       // required:true
-    },
-    images:{
-        type:[String]
-    },  
+    imagcover:{ public_id: String, secure_url: String },
+    images:[{ public_id: String, secure_url: String }],  
     category:{
         type:Types.ObjectId,
         ref:"Category"

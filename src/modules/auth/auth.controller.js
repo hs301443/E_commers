@@ -21,7 +21,10 @@ export const signup= catcherror(async(req,res,next)=>{
 export const signin= catcherror(async(req,res,next)=>{
    let{email,password} = req.body
     let isfound= await usermodel.findOne({email})
-    let match =await bcrypt.compare(password,isfound.password)
+     if(!isfound){
+        return next(new AppError("Email is not found",404))
+     }
+     let match =await bcrypt.compare(password,isfound.password)
     if(match&&isfound){
         let token = Jwt.sign({name:isfound.name,userId:isfound._id,role:isfound.role},"hassan")
         return res.json({message:"success",token})
@@ -34,7 +37,17 @@ export const protectrout= catcherror(async(req,res,next)=>{
  
     let {token}=req.headers;
     if(!token) return next(new AppError("please provide token",401))
-    let deacoded = await Jwt.verify(token, "hassan")
+    let deacoded = Jwt.verify(token, "hassan",(err, decoded) => {
+        if (err && err.name === "TokenExpiredError") {
+          return next(new AppError("jwt expired", 403));
+        }
+        if (decoded) {
+          return decoded;
+        }
+      });
+      if (!deacoded) {
+        throw new AppError("access denied", 403);
+      }
 
     let user = await usermodel.findById(deacoded.userId)
     if(!user) return next(new AppError("invalid user",401))
@@ -50,9 +63,10 @@ export const protectrout= catcherror(async(req,res,next)=>{
 
 export const allowTo=(...roles)=>{
     return catcherror((req,res,next)=>{
- 
-        if(!roles.includes(req.user.role))return next(new AppError("Not Authorized ",403))
-       
+        if(!roles.includes(req.user.role)){
+            
+            return next(new AppError("Not Authorized ",403));
+        }
         next()
 
     })

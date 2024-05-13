@@ -14,10 +14,7 @@ const brandSchema = new Schema({
         minlength:[3,"too short brand name"]
 
     },
-    logo:{
-        type:String,
-        //required:true,
-    },
+    logo: { public_id: String, secure_url: String },
     slug:{
 
         type:String,
